@@ -1,0 +1,81 @@
+-- This is a very simple EXAMPLE navigation program, which avoids obstacles using the Braitenberg algorithm
+
+if (sim_call_type==sim_childscriptcall_initialization) then 
+	usensors={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}
+	for i=1,16,1 do
+		usensors[i]=simGetObjectHandle("Pioneer_p3dx_ultrasonicSensor"..i)
+	end
+
+	--setting gps
+	gpsCommunicationTube=simTubeOpen(0,'gpsData'..simGetNameSuffix(nil),1)
+	data=simTubeRead(gpsCommunicationTube)
+	if (data) then
+	    gpsPosition=simUnpackFloats(data)		
+	end
+	
+	
+	--inisialisasi motor dan batas dengan tembok
+	motorLeft=simGetObjectHandle("Pioneer_p3dx_leftMotor")
+	motorRight=simGetObjectHandle("Pioneer_p3dx_rightMotor")
+
+	noDetectionDist=0.5
+	maxDetectionDist=0.2
+	thresholdkananMin=0.2
+	thresholdkananMax=0.3
+	thresholdMaxDepan=0.3
+	thresholdMinDepan=0.2
+	thresholdkiriMin=0.3
+	thresholdkiriMax=0.4
+	detect={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+	v0=0
+    
+    --- Camera Handler
+    camera_sensor=simGetObjectHandle('Camera')
+    camera_view=simFloatingViewAdd(0.7,0.9,0.2,0.2,0)
+    simAdjustView(camera_view,camera_sensor,64)
+
+    vision_sensor1=simGetObjectHandle('Vision_sensor')
+	vision_view1=simFloatingViewAdd(0.4,0.9,0.2,0.2,0)
+	simAdjustView(vision_view1,vision_sensor1,64)
+
+end 
+
+if (sim_call_type==sim_childscriptcall_cleanup) then 
+ 
+end 
+
+if (sim_call_type==sim_childscriptcall_actuation) then 
+	for i=1,16,1 do
+		res,dist=simReadProximitySensor(usensors[i])
+		if (res>0) and (dist<noDetectionDist) then
+			if (dist<maxDetectionDist) then
+				dist=maxDetectionDist
+			end
+			--detect[i]=1-((dist-maxDetectionDist)/(noDetectionDist-maxDetectionDist))
+		else
+			--detect[i]=0
+		end
+	end
+	
+
+	--ambil koordinat awal
+	positionX=tonumber(string.format("%.4f",simGetFloatSignal('gpsX')))
+	positionY=tonumber(string.format("%.4f",simGetFloatSignal('gpsY')))
+
+	simAddStatusbarMessage("x "..positionX)
+	simAddStatusbarMessage("Y "..positionY)
+
+	vLeft=0
+	vRight=0
+
+	simSetJointTargetVelocity(motorLeft, 3)
+	simSetJointTargetVelocity(motorRight, 3)
+	
+end
+
+
+
+
++0.5000
+-2
++0.1388

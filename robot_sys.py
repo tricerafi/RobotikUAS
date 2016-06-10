@@ -214,7 +214,7 @@ def particle_motion_model(clientID,action,pose_past,maps, particle_handler):
 	res,zMin=vrep.simxGetObjectFloatParameter(clientID,wheelHandle,17,vrep.simx_opmode_oneshot_wait)
 	res,zMax=vrep.simxGetObjectFloatParameter(clientID,wheelHandle,20,vrep.simx_opmode_oneshot_wait)
 	r=(zMax-zMin)/2
-	vTrans = ((vR*r) + (vL)*r)/2
+	vTrans = ((vR*r) + (vL*r))/2
 	
 	#cari kec. rotasi
 	errorCode,pos1=vrep.simxGetObjectPosition(clientID,left_motor,p3dx,vrep.simx_opmode_oneshot_wait)
@@ -265,39 +265,58 @@ def particle_motion_model(clientID,action,pose_past,maps, particle_handler):
 	newPosition = (xa, ya, pz)
 	newAngle = (alpha, beta, omegaa) 
 	newPose = [newPosition, newAngle]
-
-    particle_pose_set(clientID,particle_handler,newPose)    
-    
-    return newPose
+	particle_pose_set(clientID,particle_handler,newPose)
+	
+	return newPose
  
 def integrant(sensed, sensed_sim, deltasq_hit):
     return (math.exp((-1/2)*(math.pow(sensed-sensed_sim,2))/deltasq_hit))/math.sqrt(2*math.pi*deltasq_hit)
    
 def particle_sensor_model(clientID, perception, pose, maps, part_sensorH):
-    prob_q = 1
-    zmax = 2
+	prob_q = 1
+	zmax = 2
     #get readings from particle : ray casting ala-ala
-    stat, perception_sim = sensor_readAll(clientID,part_sensorH)
+	stat, perception_sim = sensor_readAll(clientID,part_sensorH)
     #intrinsic parameters
-    z_hit = 1
-    delta_hit = 1
-    deltasq_hit = delta_hit**2
-    z_short = 1
-    lambda_short = 1
-    z_max = 1
-    z_rand = 1
+	z_hit = 1
+	delta_hit = 1
+	deltasq_hit = delta_hit**2
+	z_short = 1
+	lambda_short = 1
+	z_max = 1
+	z_rand = 1
     
-    p_hit = 0
-    p_short = 0
-    p_max = 0
-    p_rand = 0
-
+	p_hit = 0
+	p_short = 0
+	p_max = 0
+	p_rand = 0
+	
+	n = 1
+	
     #---------------------------
     #DO YOUR IMPLEMENTATION HERE
     #---------------------------
-    
 	
-    return prob_q
+	if (perception >= 0) and (perception <= zmax):
+		p_hit = quad.quad(lambda x: integrant(perception,perception_sim,deltasq_hit),0,zmax)*integrant(perception,perception_sim,deltasq_hit)
+		p_rand = 1/zmax
+	else :
+		p_hit = 0
+		p_rand = 0
+	
+	if (perception >= 0) and (perception <= perception_sim):
+		p_short = (1/(1-math.exp(-lambda_short*perception_sim)))*lambda_short*(math.exp(-lambda_short*perception))
+	else :
+		p_short = 0
+	
+	if (perception == zmax):
+		p_max = 1
+	else :
+		p_max = 0
+	
+	prob_q = z_hit*p_hit + z_short*p_short + z_max*p_max + z_rand*p_rand
+	
+	return prob_q
     
 
 def particle_sensor_read(fig,position,angle,clientID,mapCoord,wallSegOri):

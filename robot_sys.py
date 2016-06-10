@@ -210,17 +210,22 @@ def particle_motion_model(clientID,action,pose_past,maps, particle_handler):
 	
 	#convert from vR and vL to v and w
 	#cari jari2 roda & kec. translasi
-	wheelHandle=vrep.simxGetObjectHandle('Pioneer_p3dx_rightMotor')
-	res,zMin=vrep.simxGetObjectFloatParameter(clientID,wheelHandle,17,vrep.simx_opmode_oneshot_wait)
-	res,zMax=vrep.simxGetObjectFloatParameter(clientID,wheelHandle,20,vrep.simx_opmode_oneshot_wait)
-	r=(zMax-zMin)/2
-	vTrans = ((vR*r) + (vL*r))/2
+	#wheelHandle=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_rightMotor',vrep.simx_opmode_oneshot_wait)
+	#res,zMin=vrep.simxGetObjectFloatParameter(clientID,wheelHandle,17,vrep.simx_opmode_oneshot_wait)
+	#res,zMax=vrep.simxGetObjectFloatParameter(clientID,wheelHandle,20,vrep.simx_opmode_oneshot_wait)
+	#r=(zMax-zMin)/2
+	vTrans = ((vR) + (vL))/2
 	
 	#cari kec. rotasi
+	errorCode,left_motor=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_leftMotor',vrep.simx_opmode_oneshot_wait)
+	errorCode,right_motor=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_rightMotor',vrep.simx_opmode_oneshot_wait)    
+	errorCode,p3dx=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx',vrep.simx_opmode_oneshot_wait)
+	
 	errorCode,pos1=vrep.simxGetObjectPosition(clientID,left_motor,p3dx,vrep.simx_opmode_oneshot_wait)
 	errorCode,pos2=vrep.simxGetObjectPosition(clientID,right_motor,p3dx,vrep.simx_opmode_oneshot_wait)
+	
 	wheelsep = math.sqrt((pos1[0]-pos2[0])*(pos1[0]-pos2[0]) + (pos1[1]-pos2[1])*(pos1[1]-pos2[1]))	
-	vRot = (vR-vL)/wheelSep    
+	vRot = (vR-vL)/wheelsep    
     
     # Set the (true) action error model
 	mu = 0.0
@@ -297,22 +302,25 @@ def particle_sensor_model(clientID, perception, pose, maps, part_sensorH):
     #DO YOUR IMPLEMENTATION HERE
     #---------------------------
 	
-	if (perception >= 0) and (perception <= zmax):
-		p_hit = quad.quad(lambda x: integrant(perception,perception_sim,deltasq_hit),0,zmax)*integrant(perception,perception_sim,deltasq_hit)
-		p_rand = 1/zmax
-	else :
-		p_hit = 0
-		p_rand = 0
+	for k in range (0,len(perception)):
+		if (perception[k] >= 0) and (perception[k] <= zmax):
+			p_hit = quad(lambda x: integrant(perception[k],perception_sim[k],deltasq_hit),0,zmax)[0]*integrant(perception[k],perception_sim[k],deltasq_hit)
+			#print 'p_hit : ',p_hit
+			p_rand = 1/zmax
+		else :
+			p_hit = 0
+			p_rand = 0
 	
-	if (perception >= 0) and (perception <= perception_sim):
-		p_short = (1/(1-math.exp(-lambda_short*perception_sim)))*lambda_short*(math.exp(-lambda_short*perception))
-	else :
-		p_short = 0
+		if (perception[k] >= 0) and (perception[k] <= perception_sim[k] and perception[k]>0.00000001):
+			#print perception_sim[k], perception[k]
+			p_short = (1/(1-math.exp(-lambda_short*perception_sim[k])))*lambda_short*(math.exp(-lambda_short*perception[k]))
+		else :
+			p_short = 0
 	
-	if (perception == zmax):
-		p_max = 1
-	else :
-		p_max = 0
+		if (perception[k] == zmax):
+			p_max = 1
+		else :
+			p_max = 0
 	
 	prob_q = z_hit*p_hit + z_short*p_short + z_max*p_max + z_rand*p_rand
 	

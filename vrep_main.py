@@ -59,7 +59,7 @@ offSetY = (pY/30) - initY
 
 #initialize particles - uniform
 particle_amount = 50
-particle_bundle = particle_init(particle_amount)
+particle_bundle = robo.particle_init(particle_amount)
 
 #dummy action list - only moving straight with vr=vl=2
 actionNow = [2,2] #edit this to list of movement to navigate around the rooms
@@ -101,7 +101,7 @@ for i in range(1,10):
     #MCL STARTS HERE    
     particle_bundle = pf.run(clientID, particle_bundle, actionNow, rVal, mapAll, sensorH_particle, particle_handler)    
     #MCL ENDS HERE
-    
+	
     #map plotting
     for ii in range(-1,len(mapCoord)):
         ax1 = fig.add_subplot(111, aspect='equal')

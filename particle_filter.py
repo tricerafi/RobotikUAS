@@ -39,15 +39,31 @@ def resample(X_bar):
     return X
     
 def run(clientID, X_past, u, z, m, part_sensorH, part_botH):
-    ''' 
-    \param X: is a list of tuples (x, w)
-    \param u: the control/action
-    \param z: the observation
-    \param m: the given map
-    '''
+	''' 
+	\param X: is a list of tuples (x, w)
+	\param u: the control/action
+	\param z: the observation
+	\param m: the given map
+	'''
     #---------------------------
     #DO YOUR IMPLEMENTATION HERE
     #---------------------------
+	arr_x_bar = []
+	
+	for i in range(len(X_past)):
+		x_new = robo.particle_motion_model(clientID,u,X_past[i][0],m,part_botH)
+		z_new = robo.particle_sensor_model(clientID,z,x_new,m,part_sensorH)
+		arr_x_bar.append((x_new, z_new))
+
+	total_w = sum([ x_bar[1] for x_bar in arr_x_bar ])
+
+	arr_x = []
+	if total_w != 0:
+		arr_x = resample(arr_x_bar)
+	else:
+		arr_x = arr_x_bar
+	return arr_x
+
 
     
 def run_kld(X_past, u, z, m, eps, delta):

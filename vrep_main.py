@@ -66,7 +66,9 @@ actionNow = [2,2] #edit this to list of movement to navigate around the rooms
 
 #iterate!
 for i in range(1,10):
-    #while True :
+    rStat, rVal = robo.sensor_readAll(clientID,sensorH)
+    
+	#while True :
     print 'Iteration : ', i  
     
     #initialize map plotting 
@@ -81,18 +83,26 @@ for i in range(1,10):
     realCoord, realAngle = robo.pose(clientID,robot_handler)
     realX = realCoord[0]
     realY = realCoord[1]
-
-    #move a robot for 1 second    
-    robo.motor_move(clientID,left_motor,3,right_motor,3)
-    time.sleep(1)
-    robo.motor_move(clientID,left_motor,0,right_motor,0)
+	
+    #move a robot for 1 second 
+    if(rVal[3] < 0.0000001):
+		robo.motor_move(clientID,left_motor,3,right_motor,-3)
+		time.sleep(1)
+		robo.motor_move(clientID,left_motor,0,right_motor,0)
+		actionNow =[3,-2]
+    else :
+		robo.motor_move(clientID,left_motor,3,right_motor,3)
+		time.sleep(1)
+		robo.motor_move(clientID,left_motor,0,right_motor,0)
+		actionNow =[3,3]
     
     #read sensor value    
-    rStat, rVal = robo.sensor_readAll(clientID,sensorH)
     print 'read-real', rVal    
       
     print '-------------------'    
     
+	
+	
     #print 'position: ', realX, ',' ,realY
     print 'position-real: ', realCoord
     print 'angle-real: ',realAngle

@@ -103,17 +103,17 @@ def sensor_init(clientID):
     #errorCode,usensor6=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor6',vrep.simx_opmode_oneshot_wait)    
     errorCode,usensor7=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor7',vrep.simx_opmode_oneshot_wait)    
     errorCode,usensor8=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor8',vrep.simx_opmode_oneshot_wait)    
-    #errorCode,usensor9=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor9',vrep.simx_opmode_oneshot_wait)    
+    errorCode,usensor9=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor9',vrep.simx_opmode_oneshot_wait)    
     #errorCode,usensor10=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor10',vrep.simx_opmode_oneshot_wait)    
     #errorCode,usensor11=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor11',vrep.simx_opmode_oneshot_wait)    
     #errorCode,usensor12=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor12',vrep.simx_opmode_oneshot_wait)    
     #errorCode,usensor13=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor13',vrep.simx_opmode_oneshot_wait)    
     #errorCode,usensor14=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor14',vrep.simx_opmode_oneshot_wait)    
     #errorCode,usensor15=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor15',vrep.simx_opmode_oneshot_wait)    
-    #errorCode,usensor16=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor16',vrep.simx_opmode_oneshot_wait)    
+    errorCode,usensor16=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor16',vrep.simx_opmode_oneshot_wait)    
        
     #return [usensor1,usensor2,usensor3,usensor4,usensor5,usensor6,usensor7,usensor8,usensor9,usensor10,usensor11,usensor12,usensor13,usensor14,usensor15,usensor16]
-    return [usensor1,usensor2,usensor7,usensor8]
+    return [usensor1,usensor2,usensor7,usensor8,usensor9,usensor16]
     
 def sensor_read(clientID,sensorHandler):
     errorCode,state,point,detectedObjectHandle,detectedSurfaceNormalVector = vrep.simxReadProximitySensor(clientID,sensorHandler,vrep.simx_opmode_oneshot_wait)
@@ -181,17 +181,17 @@ def particle_sensor_init(clientID):
     #errorCode,usensor6=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor6#0',vrep.simx_opmode_oneshot_wait)    
     errorCode,usensor7=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor7#0',vrep.simx_opmode_oneshot_wait)    
     errorCode,usensor8=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor8#0',vrep.simx_opmode_oneshot_wait)    
-    #errorCode,usensor9=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor9#0',vrep.simx_opmode_oneshot_wait)    
+    errorCode,usensor9=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor9#0',vrep.simx_opmode_oneshot_wait)    
     #errorCode,usensor10=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor10#0',vrep.simx_opmode_oneshot_wait)    
     #errorCode,usensor11=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor11#0',vrep.simx_opmode_oneshot_wait)    
     #errorCode,usensor12=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor12#0',vrep.simx_opmode_oneshot_wait)    
     #errorCode,usensor13=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor13#0',vrep.simx_opmode_oneshot_wait)    
     #errorCode,usensor14=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor14#0',vrep.simx_opmode_oneshot_wait)    
     #errorCode,usensor15=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor15#0',vrep.simx_opmode_oneshot_wait)    
-    #errorCode,usensor16=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor16#0',vrep.simx_opmode_oneshot_wait)    
+    errorCode,usensor16=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_ultrasonicSensor16#0',vrep.simx_opmode_oneshot_wait)    
        
     #return [usensor1,usensor2,usensor3,usensor4,usensor5,usensor6,usensor7,usensor8,usensor9,usensor10,usensor11,usensor12,usensor13,usensor14,usensor15,usensor16]
-    return [usensor1,usensor2,usensor7,usensor8]
+    return [usensor1,usensor2,usensor7,usensor8,usensor9,usensor16]
 
 def particle_pose_set(clientID,particle_handler,pose):
     position = pose[0]
@@ -215,6 +215,7 @@ def particle_motion_model(clientID,action,pose_past,maps, particle_handler):
 	#res,zMax=vrep.simxGetObjectFloatParameter(clientID,wheelHandle,20,vrep.simx_opmode_oneshot_wait)
 	#r=(zMax-zMin)/2
 	vTrans = ((vR) + (vL))/2
+	#print 'vTrans : ',vTrans
 	
 	#cari kec. rotasi
 	errorCode,left_motor=vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_leftMotor',vrep.simx_opmode_oneshot_wait)
@@ -225,16 +226,17 @@ def particle_motion_model(clientID,action,pose_past,maps, particle_handler):
 	errorCode,pos2=vrep.simxGetObjectPosition(clientID,right_motor,p3dx,vrep.simx_opmode_oneshot_wait)
 	
 	wheelsep = math.sqrt((pos1[0]-pos2[0])*(pos1[0]-pos2[0]) + (pos1[1]-pos2[1])*(pos1[1]-pos2[1]))	
-	vRot = (vR-vL)/wheelsep    
+	vRot = (vR-vL)/wheelsep 
+	#print 'vRot : ',vRot
     
     # Set the (true) action error model
-	mu = 0.0
+	mu = 0.1
 	std = 0.25
 
     #set alpha & delta t
-	a1=0.01
+	a1=0.1
 	a2=0.01
-	a3=0.01
+	a3=0.1
 	a4=0.01
 	a5=0.01
 	a6=0.01
@@ -251,8 +253,14 @@ def particle_motion_model(clientID,action,pose_past,maps, particle_handler):
 	std_rot = a5*abs(vTrans) + a6*abs(vRot)
 	
 	err_v = np.random.normal(mu, std_v)
+	
+	#print 'err_v : ',err_v
 	err_w = np.random.normal(mu, std_w)
+	#err_w = 0.5
+	#print 'err_w : ',err_w
 	gamma = np.random.normal(mu, std_rot)
+	#gamma = 0.5
+	#print 'gamma : ',gamma
 	
 	vTransa = vTrans + err_v
 	vRota = vRot + err_w 
@@ -267,11 +275,22 @@ def particle_motion_model(clientID,action,pose_past,maps, particle_handler):
 	ya = py + (vTransa/vRota)*math.cos(omega) - (vTransa/vRota)*math.cos(omega + vRota*dt)
 	omegaa = omega + vRota*dt + gamma*dt
 	
+	#print 'sin omega : ',math.sin(omega)
+	#print 'cos omega : ',math.cos(omega)
 	newPosition = (xa, ya, pz)
 	newAngle = (alpha, beta, omegaa) 
 	newPose = [newPosition, newAngle]
 	particle_pose_set(clientID,particle_handler,newPose)
 	
+	wallPosList,wallOrientationList = maps
+	
+	if(map_checkCollision(clientID,wallPosList,wallOrientationList,xa,ya)) :
+		newPose = pose_past
+	
+	if(xa<-2.5 or xa>2.5 or ya<-2.5 or ya>2.5) :
+		newPose = pose_past
+	
+	#print 'hasil motion model : ',newPose
 	return newPose
  
 def integrant(sensed, sensed_sim, deltasq_hit):
@@ -279,17 +298,17 @@ def integrant(sensed, sensed_sim, deltasq_hit):
    
 def particle_sensor_model(clientID, perception, pose, maps, part_sensorH):
 	prob_q = 1
-	zmax = 2
+	zmax = 3
     #get readings from particle : ray casting ala-ala
 	stat, perception_sim = sensor_readAll(clientID,part_sensorH)
     #intrinsic parameters
-	z_hit = 1
-	delta_hit = 1
+	z_hit = 0.25
+	delta_hit = 0.1
 	deltasq_hit = delta_hit**2
-	z_short = 1
-	lambda_short = 1
-	z_max = 1
-	z_rand = 1
+	z_short = 0.25
+	lambda_short = 0.1
+	z_max = 0.25
+	z_rand = 0.25
     
 	p_hit = 0
 	p_short = 0
@@ -304,7 +323,7 @@ def particle_sensor_model(clientID, perception, pose, maps, part_sensorH):
 	
 	for k in range (0,len(perception)):
 		if (perception[k] >= 0) and (perception[k] <= zmax):
-			p_hit = quad(lambda x: integrant(perception[k],perception_sim[k],deltasq_hit),0,zmax)[0]*integrant(perception[k],perception_sim[k],deltasq_hit)
+			p_hit = quad(lambda x: integrant(perception[k],perception_sim[k],deltasq_hit),0,z_max)[0]*integrant(perception[k],perception_sim[k],deltasq_hit)
 			#print 'p_hit : ',p_hit
 			p_rand = 1/zmax
 		else :
@@ -323,7 +342,7 @@ def particle_sensor_model(clientID, perception, pose, maps, part_sensorH):
 			p_max = 0
 	
 	prob_q = z_hit*p_hit + z_short*p_short + z_max*p_max + z_rand*p_rand
-	
+	#print 'prob q : ',prob_q
 	return prob_q
     
 

@@ -58,7 +58,7 @@ offSetX = (pX/30) - initX
 offSetY = (pY/30) - initY
 
 #initialize particles - uniform
-particle_amount = 50
+particle_amount = 150
 particle_bundle = robo.particle_init(particle_amount)
 
 #dummy action list - only moving straight with vr=vl=2
@@ -85,7 +85,7 @@ for i in range(1,10):
     realY = realCoord[1]
 	
     #move a robot for 1 second 
-    if(rVal[3] < 0.0000001):
+    if(rVal[3] == 0.0000001):
 		robo.motor_move(clientID,left_motor,3,right_motor,-3)
 		time.sleep(1)
 		robo.motor_move(clientID,left_motor,0,right_motor,0)
